@@ -14,7 +14,9 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith(route),
   );
 
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+  const isAuthRoute = authRoutes.some((route) =>
+    pathname.startsWith(route),
+  );
 
   if (!isPrivateRoute && !isAuthRoute) {
     return NextResponse.next();
@@ -39,7 +41,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (!accessToken && refreshToken) {
+  if (refreshToken) {
     try {
       const session = await checkSession();
       const response = NextResponse.next();
@@ -47,32 +49,44 @@ export async function proxy(request: NextRequest) {
       const setCookie = session.headers["set-cookie"];
 
       if (setCookie) {
-        const cookies = Array.isArray(setCookie) ? setCookie : [setCookie];
+        const cookies = Array.isArray(setCookie)
+          ? setCookie
+          : [setCookie];
 
         cookies.forEach((cookie) => {
           const parsedCookie = parseSetCookie(cookie);
 
-          if (!parsedCookie?.value) {
+          if (!parsedCookie?.name) {
             return;
           }
 
           response.cookies.set({
             name: parsedCookie.name,
-            value: parsedCookie.value,
-            ...(parsedCookie.domain && { domain: parsedCookie.domain }),
-            ...(parsedCookie.expires && { expires: parsedCookie.expires }),
+            value: parsedCookie.value ?? "",
+            ...(parsedCookie.domain && {
+              domain: parsedCookie.domain,
+            }),
+            ...(parsedCookie.expires && {
+              expires: parsedCookie.expires,
+            }),
             ...(parsedCookie.httpOnly !== undefined && {
               httpOnly: parsedCookie.httpOnly,
             }),
             ...(parsedCookie.maxAge !== undefined && {
               maxAge: parsedCookie.maxAge,
             }),
-            ...(parsedCookie.path && { path: parsedCookie.path }),
+            ...(parsedCookie.path && {
+              path: parsedCookie.path,
+            }),
             ...(parsedCookie.partitioned !== undefined && {
               partitioned: parsedCookie.partitioned,
             }),
-            ...(parsedCookie.priority && { priority: parsedCookie.priority }),
-            ...(parsedCookie.sameSite && { sameSite: parsedCookie.sameSite }),
+            ...(parsedCookie.priority && {
+              priority: parsedCookie.priority,
+            }),
+            ...(parsedCookie.sameSite && {
+              sameSite: parsedCookie.sameSite,
+            }),
             ...(parsedCookie.secure !== undefined && {
               secure: parsedCookie.secure,
             }),
@@ -86,6 +100,7 @@ export async function proxy(request: NextRequest) {
 
       return response;
     } catch {
+
       if (isPrivateRoute) {
         return NextResponse.redirect(new URL("/sign-in", request.url));
       }
@@ -98,5 +113,10 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
+  matcher: [
+    "/profile/:path*",
+    "/notes/:path*",
+    "/sign-in",
+    "/sign-up",
+  ],
 };
