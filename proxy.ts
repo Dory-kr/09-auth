@@ -46,7 +46,9 @@ export async function proxy(request: NextRequest) {
       const setCookie = session.headers["set-cookie"];
 
       if (setCookie) {
-        setCookie.forEach((cookie) => {
+        const cookies = Array.isArray(setCookie) ? setCookie : [setCookie];
+
+        cookies.forEach((cookie) => {
           const [nameValue] = cookie.split(";");
           const separatorIndex = nameValue.indexOf("=");
 
