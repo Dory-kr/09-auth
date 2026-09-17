@@ -1,3 +1,4 @@
+import { parseSetCookie } from "cookie";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -49,17 +50,33 @@ export async function proxy(request: NextRequest) {
         const cookies = Array.isArray(setCookie) ? setCookie : [setCookie];
 
         cookies.forEach((cookie) => {
-          const [nameValue] = cookie.split(";");
-          const separatorIndex = nameValue.indexOf("=");
+          const parsedCookie = parseSetCookie(cookie);
 
-          if (separatorIndex === -1) {
+          if (!parsedCookie?.value) {
             return;
           }
 
-          const name = nameValue.slice(0, separatorIndex);
-          const value = nameValue.slice(separatorIndex + 1);
-
-          response.cookies.set(name, value);
+          response.cookies.set({
+            name: parsedCookie.name,
+            value: parsedCookie.value,
+            ...(parsedCookie.domain && { domain: parsedCookie.domain }),
+            ...(parsedCookie.expires && { expires: parsedCookie.expires }),
+            ...(parsedCookie.httpOnly !== undefined && {
+              httpOnly: parsedCookie.httpOnly,
+            }),
+            ...(parsedCookie.maxAge !== undefined && {
+              maxAge: parsedCookie.maxAge,
+            }),
+            ...(parsedCookie.path && { path: parsedCookie.path }),
+            ...(parsedCookie.partitioned !== undefined && {
+              partitioned: parsedCookie.partitioned,
+            }),
+            ...(parsedCookie.priority && { priority: parsedCookie.priority }),
+            ...(parsedCookie.sameSite && { sameSite: parsedCookie.sameSite }),
+            ...(parsedCookie.secure !== undefined && {
+              secure: parsedCookie.secure,
+            }),
+          });
         });
       }
 
