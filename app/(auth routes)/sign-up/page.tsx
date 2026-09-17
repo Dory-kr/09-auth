@@ -41,6 +41,7 @@ export default function SignUpPage() {
             <input
               className={css.input}
               type="email"
+              name="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
@@ -52,6 +53,7 @@ export default function SignUpPage() {
             <input
               className={css.input}
               type="password"
+              name="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
@@ -68,10 +70,7 @@ export default function SignUpPage() {
         </form>
 
         <p>
-          Already have an account?{" "}
-          <Link href="/sign-in">
-            Sign in
-          </Link>
+          Already have an account? <Link href="/sign-in">Sign in</Link>
         </p>
       </div>
     </main>

@@ -64,12 +64,10 @@ export const getMe = async (): Promise<User> => {
   return response.data;
 };
 
-export const checkSession = async (): Promise<{ success: boolean }> => {
-  const response = await api.get<{ success: boolean }>("/auth/session", {
+export const checkSession = async () => {
+  return api.get<{ success: boolean }>("/auth/session", {
     headers: {
       Cookie: await getCookieHeader(),
     },
   });
-
-  return response.data;
 };
