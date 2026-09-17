@@ -47,7 +47,17 @@ export async function proxy(request: NextRequest) {
 
       if (setCookie) {
         setCookie.forEach((cookie) => {
-          response.headers.append("set-cookie", cookie);
+          const [nameValue] = cookie.split(";");
+          const separatorIndex = nameValue.indexOf("=");
+
+          if (separatorIndex === -1) {
+            return;
+          }
+
+          const name = nameValue.slice(0, separatorIndex);
+          const value = nameValue.slice(separatorIndex + 1);
+
+          response.cookies.set(name, value);
         });
       }
 
